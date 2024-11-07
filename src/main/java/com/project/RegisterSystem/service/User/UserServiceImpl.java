@@ -2,6 +2,7 @@ package com.project.RegisterSystem.service.User;
 
 import com.project.RegisterSystem.config.JwtUtils;
 import com.project.RegisterSystem.dto.RegisterDto;
+import com.project.RegisterSystem.dto.UserDto;
 import com.project.RegisterSystem.dto.response.LoginRequest;
 import com.project.RegisterSystem.dto.response.ResponseStatusDto;
 import com.project.RegisterSystem.entity.*;
@@ -91,7 +92,11 @@ public class RegisterServiceImpl implements UserService {
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())){
             throw new InvalidCredentialsException("Password does not match");
         }
-        String token = jwtUtils.generateToken(user);
+        UserDto userDto = new UserDto();
+        userDto.setEmail(user.getEmail());
+        userDto.setRole(user.getRole());
+
+        String token = jwtUtils.generateToken(userDto);
         cookieService.addCookie(response, "JWT_TOKEN", token, 3600); // Đặt thời gian sống cookie là 1 giờ (3600 giây)
         return ResponseStatusDto.builder()
                 .status(200)
