@@ -12,4 +12,7 @@ spring:
 
 
 #Test
-secert.jwt.string : E978AF5875411FD33FE319AF8EB22
+secret:
+  jwt:
+    string: "1DBB1AC5F984DFAF3986FF329723BhFnGcUwd3LoSCD5u3HWiVItShbOLh3BP"
+

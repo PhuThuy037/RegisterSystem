@@ -13,8 +13,9 @@ public class Appcept {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToMany
-    private List<Student> studentList;
+    @ManyToOne
+    @JoinColumn(name = "student_id")
+    private Student student;
 
     @OneToOne
     @JoinColumn(name = "event_id")

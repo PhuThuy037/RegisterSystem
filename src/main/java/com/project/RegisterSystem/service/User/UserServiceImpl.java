@@ -3,13 +3,15 @@ package com.project.RegisterSystem.service.User;
 import com.project.RegisterSystem.config.JwtUtils;
 import com.project.RegisterSystem.dto.RegisterDto;
 import com.project.RegisterSystem.dto.UserDto;
-import com.project.RegisterSystem.dto.response.LoginRequest;
+import com.project.RegisterSystem.dto.request.LoginRequest;
 import com.project.RegisterSystem.dto.response.ResponseStatusDto;
 import com.project.RegisterSystem.entity.*;
 import com.project.RegisterSystem.enums.UserRole;
 import com.project.RegisterSystem.exception.InvalidCredentialsException;
+import com.project.RegisterSystem.exception.NotFoundException;
 import com.project.RegisterSystem.repository.*;
 import com.project.RegisterSystem.service.Cookie.CookieService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,7 +21,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 
-public class RegisterServiceImpl implements UserService {
+public class UserServiceImpl implements UserService {
     private final UserRepo userRepo;
     private final StudentRepo studentRepo;
     private final UniversityStaffRepo universityStaffRepo;
@@ -32,9 +34,24 @@ public class RegisterServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
 
+
+
     @Override
-    public User getLoginUser() {
-        return null;
+    public UserDto getLoginUser(HttpServletRequest request) {
+       String token =  cookieService.getCookie(request, "token");
+        if (token == null) {
+            throw new InvalidCredentialsException("Not Authenticated");
+        }
+        String username = jwtUtils.getUsernameFromToken(token);
+
+        User user = userRepo.findByEmail(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        UserDto userDto = new UserDto();
+        userDto.setEmail(user.getEmail());
+        userDto.setRole(user.getRole());
+
+        return userDto;
     }
 
     @Override
@@ -42,7 +59,8 @@ public class RegisterServiceImpl implements UserService {
         User user = new User();
         user.setFullName(registerDto.getFullName());
         user.setEmail(registerDto.getEmail());
-        user.setPassword(registerDto.getPassword());
+        user.setPassword(passwordEncoder.encode(registerDto.getPassword()));
+
         user.setPhoneNumber(registerDto.getPhoneNumber());
         user.setRole(registerDto.getRole());
 
@@ -88,7 +106,7 @@ public class RegisterServiceImpl implements UserService {
 
     @Override
     public ResponseStatusDto login(LoginRequest loginRequest, HttpServletResponse response) {
-        User user = userRepo.findByEmail(loginRequest.getEmail()).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepo.findByEmail(loginRequest.getEmail()).orElseThrow(() -> new NotFoundException("User not found"));
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())){
             throw new InvalidCredentialsException("Password does not match");
         }
@@ -97,7 +115,7 @@ public class RegisterServiceImpl implements UserService {
         userDto.setRole(user.getRole());
 
         String token = jwtUtils.generateToken(userDto);
-        cookieService.addCookie(response, "JWT_TOKEN", token, 3600); // Đặt thời gian sống cookie là 1 giờ (3600 giây)
+        cookieService.addCookie(response, "token", token, 3600); // Đặt thời gian sống cookie là 1 giờ (3600 giây)
         return ResponseStatusDto.builder()
                 .status(200)
                 .message("User logged in successfully")

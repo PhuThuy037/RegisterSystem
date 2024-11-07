@@ -1,5 +1,6 @@
 package com.project.RegisterSystem.config;
 
+import com.project.RegisterSystem.dto.UserDto;
 import com.project.RegisterSystem.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -19,7 +20,7 @@ import java.util.function.Function;
 public class JwtUtils {
     private static final long EXPIRATION_TIME_IN_MILLISEC = 1000L * 60L *60L *24L * 30L * 6L; //expirers 6 months
     private SecretKey key;
-    @Value("${secert.jwt.string}")
+    @Value("${secret.jwt.string}")
     private String secreteJwtString;
 
     @PostConstruct
@@ -28,8 +29,8 @@ public class JwtUtils {
         this.key = new SecretKeySpec(keyBytes, "HmacSHA256");
     }
 
-    public String generateToken(User user){
-        String username = user.getEmail();
+    public String generateToken(UserDto userDto){
+        String username = userDto.getEmail();
         return generateToken(username);
     }
 

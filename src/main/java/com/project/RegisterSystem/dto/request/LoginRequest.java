@@ -1,7 +1,6 @@
-package com.project.RegisterSystem.dto.response;
+package com.project.RegisterSystem.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.Builder;
 import lombok.Data;
 
 @Data

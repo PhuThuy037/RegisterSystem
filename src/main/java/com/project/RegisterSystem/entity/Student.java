@@ -1,5 +1,6 @@
 package com.project.RegisterSystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -17,7 +18,16 @@ public class Student {
 
     @ManyToOne
     @JoinColumn(name = "university_id")
+    @JsonIgnore
     private University university;
 
     private String address;
+
+    @ManyToOne
+    @JoinColumn(name = "event")
+    @JsonIgnore
+    private Event event;
+
+    private String MSSV;
+
 }

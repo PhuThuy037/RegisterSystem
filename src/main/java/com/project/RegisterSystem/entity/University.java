@@ -1,5 +1,6 @@
 package com.project.RegisterSystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -22,5 +23,8 @@ public class University {
 
     @OneToMany(mappedBy = "university")
     private List<Student> students;
+
+    @OneToMany(mappedBy = "university", cascade = CascadeType.ALL)
+    private List<Event> events;
 
 }

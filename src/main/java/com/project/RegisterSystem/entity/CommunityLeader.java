@@ -19,7 +19,7 @@ public class CommunityLeader {
     private String phone;
 
     private String address;
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "event_id")
     @JsonIgnore
     private Event event;

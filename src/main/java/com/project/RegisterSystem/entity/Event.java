@@ -1,5 +1,6 @@
 package com.project.RegisterSystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.project.RegisterSystem.enums.Status;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -27,12 +28,20 @@ public class Event {
     private int numberOfPeople;
 
 
-
-    @OneToMany(mappedBy = "event")
-    private List<CommunityLeader> communityLeader;
+    @OneToOne(mappedBy = "event")
+    private CommunityLeader communityLeader;
 
     @OneToOne
     @JoinColumn(name = "accept_id")
     private Appcept appcept;
+
+    @ManyToOne
+    @JoinColumn(name = "university_id")
+    @JsonIgnore
+    private University university;
+
+    @OneToMany
+    @JoinColumn(name = "event")
+    private List<Student> students;
 
 }
