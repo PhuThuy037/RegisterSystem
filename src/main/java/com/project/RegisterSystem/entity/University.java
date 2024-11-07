@@ -20,4 +20,7 @@ public class University {
     @OneToMany(mappedBy = "university")
     private List<UniversityStaff> universityStaff;
 
+    @OneToMany(mappedBy = "university")
+    private List<Student> students;
+
 }

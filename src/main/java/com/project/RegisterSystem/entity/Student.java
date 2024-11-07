@@ -16,6 +16,7 @@ public class Student {
     private User user;
 
     @ManyToOne
+    @JoinColumn(name = "university_id")
     private University university;
 
     private String address;
