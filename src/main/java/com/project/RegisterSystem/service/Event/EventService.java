@@ -5,11 +5,12 @@ import com.project.RegisterSystem.dto.ListStudentAppceptDto;
 import com.project.RegisterSystem.dto.response.ResponseStatusDto;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 public interface EventService {
-    EventDto createEvent(EventDto eventDto,HttpServletRequest request);
+    EventDto createEvent(EventDto eventDto, HttpServletRequest request);
     EventDto updateEvent(EventDto eventDto, Long eventId);
     ResponseStatusDto deleteEvent(Long id);
     EventDto getEvent(Long id);

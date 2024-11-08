@@ -45,4 +45,6 @@ public class Event {
     @JoinColumn(name = "event")
     private List<Student> students;
 
+
+
 }

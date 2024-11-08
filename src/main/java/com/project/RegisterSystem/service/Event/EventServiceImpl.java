@@ -20,6 +20,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -66,6 +67,7 @@ public class EventServiceImpl implements EventService {
 
         // Chuyển đổi từ DTO sang Entity
         Event event = eventMapper.toEntity(eventDto);
+
 
         // Gắn trường đại học vào sự kiện
         event.setUniversity(university);
@@ -147,7 +149,11 @@ public class EventServiceImpl implements EventService {
 
         Student student = studentRepo.findByUserId(user.getId());
 
-        List<Event> events = eventRepository.findByUniversity_UniversityName(student.getUniversity().getUniversityName());
+        List<Event> events = eventRepository.findByUniversity_UniversityName(student.getUniversity().getUniversityName())
+                .stream()
+                .filter(event -> event.getStatus() == Status.Appcept)
+                .toList();
+
 
         // Chuyển đổi từ Entity Event sang DTO EventDto
         return events.stream()

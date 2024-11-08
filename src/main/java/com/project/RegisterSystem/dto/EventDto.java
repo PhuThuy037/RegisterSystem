@@ -24,4 +24,5 @@ public class EventDto {
     private UniversityDto universities;
 
 
+
 }
