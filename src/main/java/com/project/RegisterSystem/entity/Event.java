@@ -28,7 +28,8 @@ public class Event {
     private int numberOfPeople;
 
 
-    @OneToOne(mappedBy = "event")
+    @ManyToOne
+    @JoinColumn(name = "community_leader_id")
     private CommunityLeader communityLeader;
 
     @OneToOne

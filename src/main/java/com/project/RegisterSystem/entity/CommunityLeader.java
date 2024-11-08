@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.List;
+
 @Entity
 @Data
 @Table(name = "community_leader")
@@ -19,9 +21,8 @@ public class CommunityLeader {
     private String phone;
 
     private String address;
-    @OneToOne
-    @JoinColumn(name = "event_id")
+    @OneToMany(mappedBy = "communityLeader")
     @JsonIgnore
-    private Event event;
+    private List<Event> event;
 
 }

@@ -20,6 +20,7 @@ public interface EventService {
     ResponseStatusDto acceptEvent(Long id);
 
     List<ListStudentAppceptDto> getListStudentAppcept(Long id,HttpServletRequest request);
+    List<EventDto> getAllEventByCL(HttpServletRequest request);
 
 
 }

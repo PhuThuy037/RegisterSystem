@@ -48,4 +48,8 @@ public class EventController {
     ResponseEntity<List<ListStudentAppceptDto>> acceptEventList(Long eventId, HttpServletRequest request) {
         return ResponseEntity.ok(eventService.getListStudentAppcept(eventId,request));
     }
+    @GetMapping("/all-by-cl")
+    ResponseEntity<List<EventDto>> getAllEventsByCl(HttpServletRequest request) {
+        return ResponseEntity.ok(eventService.getAllEventByCL(request));
+    }
 }

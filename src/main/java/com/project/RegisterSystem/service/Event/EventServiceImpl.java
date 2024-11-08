@@ -73,7 +73,7 @@ public class EventServiceImpl implements EventService {
         // Lưu sự kiện vào cơ sở dữ liệu
         event = eventRepository.save(event);
 
-        communityLeader.setEvent(event);
+        communityLeader.getEvent().add(event);
 
         // Trả về DTO sau khi lưu
         return eventMapper.toDto(event);
@@ -191,6 +191,31 @@ public class EventServiceImpl implements EventService {
                     dto.setEventName(appcept.getEvent().getEventName()); // Lấy tên sự kiện từ Appcept
                     return dto;
                 })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<EventDto> getAllEventByCL(HttpServletRequest request) {
+
+
+        String token =  cookieService.getCookie(request, "token");
+        if (token == null) {
+            throw new InvalidCredentialsException("Not Authenticated");
+        }
+        String username = jwtUtils.getUsernameFromToken(token);
+
+        User user = userRepo.findByEmail(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+
+        CommunityLeader communityLeader = clRepo.findByUserId(user.getId());
+        List<Event> events = communityLeader.getEvent();
+        if (events.isEmpty()) {
+            return List.of(); // Trả về danh sách rỗng nếu không có sự kiện
+        }
+
+        return events.stream()
+                .map(eventMapper::toDto)
                 .collect(Collectors.toList());
     }
 }
