@@ -1,18 +1,30 @@
 package com.project.RegisterSystem.mapper;
 
+import com.project.RegisterSystem.dto.CommnityLeaderDto;
 import com.project.RegisterSystem.dto.EventDto;
 import com.project.RegisterSystem.dto.UniversityDto;
 import com.project.RegisterSystem.entity.CommunityLeader;
 import com.project.RegisterSystem.entity.Event;
 import com.project.RegisterSystem.entity.University;
 import com.project.RegisterSystem.enums.Status;
+import com.project.RegisterSystem.exception.NotFoundException;
+import com.project.RegisterSystem.repository.CLRepo;
+import com.project.RegisterSystem.repository.EventRepo;
+import com.project.RegisterSystem.repository.UserRepo;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class EventMapper {
+
+    private final UserRepo userRepo;
+    private final CLRepo clRepo;
+
 
     // Chuyển từ Entity Event sang DTO EventDto
     public EventDto toDto(Event event) {
@@ -26,10 +38,8 @@ public class EventMapper {
         eventDto.setLocation(event.getLocation());
         eventDto.setNumberOfPeople(event.getNumberOfPeople());
 
-        // Ánh xạ CommunityLeader nếu có
-        if(event.getCommunityLeader() != null) {
-            eventDto.setCommunityLeader(event.getCommunityLeader());
-        }
+
+
 
 
         // Ánh xạ UniversityDto nếu có (1 trường đại học duy nhất)
@@ -54,11 +64,10 @@ public class EventMapper {
         event.setStatus(eventDto.getStatus());
         event.setLocation(eventDto.getLocation());
         event.setNumberOfPeople(eventDto.getNumberOfPeople());
+        CommunityLeader communityLeader = clRepo.findById(eventDto.getCommnityLeaderDto().getId())
+                .orElseThrow(()-> new NotFoundException("Not Found user"));
+       event.setCommunityLeader(communityLeader);
 
-         //Nếu có CommunityLeader, ánh xạ từ dto sang entity
-        if(eventDto.getCommunityLeader() != null) {
-            event.setCommunityLeader(eventDto.getCommunityLeader());
-        }
 
 
         // Nếu có UniversityDto, ánh xạ sang trường đại học entity

@@ -1,19 +1,22 @@
 package com.project.RegisterSystem.service.Event;
 
+import com.project.RegisterSystem.config.JwtUtils;
+import com.project.RegisterSystem.dto.CommnityLeaderDto;
 import com.project.RegisterSystem.dto.EventDto;
 import com.project.RegisterSystem.dto.ListStudentAppceptDto;
+import com.project.RegisterSystem.dto.UserDto;
 import com.project.RegisterSystem.dto.response.ResponseStatusDto;
-import com.project.RegisterSystem.entity.Appcept;
-import com.project.RegisterSystem.entity.Event;
-import com.project.RegisterSystem.entity.Student;
-import com.project.RegisterSystem.entity.University;
+import com.project.RegisterSystem.entity.*;
 import com.project.RegisterSystem.enums.Status;
+import com.project.RegisterSystem.enums.UserRole;
+import com.project.RegisterSystem.exception.InvalidCredentialsException;
 import com.project.RegisterSystem.exception.NotFoundException;
 import com.project.RegisterSystem.mapper.EventMapper;
-import com.project.RegisterSystem.repository.AppceptRepo;
-import com.project.RegisterSystem.repository.EventRepo;
-import com.project.RegisterSystem.repository.StudentRepo;
-import com.project.RegisterSystem.repository.UniversityRepo;
+import com.project.RegisterSystem.repository.*;
+import com.project.RegisterSystem.service.Cookie.CookieService;
+import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
@@ -30,25 +33,50 @@ public class EventServiceImpl implements EventService {
     private final UniversityRepo universityRepository;
     private final EventMapper eventMapper;
     private final AppceptRepo appceptRepository;
+    private final CookieService cookieService;
+    private final JwtUtils jwtUtils;
+    private final StudentRepo studentRepo;
+    private final UserRepo userRepo;
+    private final CLRepo clRepo;
     @Override
-    public EventDto createEvent(EventDto eventDto) {
+    public EventDto createEvent(EventDto eventDto, HttpServletRequest request) {
+        // Tìm trường đại học dựa trên tên
+        University university = universityRepository.findByUniversityName(eventDto.getUniversities().getUniversityName())
+                .orElseThrow(() -> new NotFoundException("University not found"));
+
+
+        String token =  cookieService.getCookie(request, "token");
+        if (token == null) {
+            throw new InvalidCredentialsException("Not Authenticated");
+        }
+        String username = jwtUtils.getUsernameFromToken(token);
+
+        User user = userRepo.findByEmail(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+
+        CommunityLeader communityLeader = clRepo.findByUserId(user.getId());
+        CommnityLeaderDto commnityLeaderDto = new CommnityLeaderDto();
+        commnityLeaderDto.setName(user.getFullName());
+        commnityLeaderDto.setId(communityLeader.getId());
+        eventDto.setCommnityLeaderDto(commnityLeaderDto);
+
+
+
+
+        // Chuyển đổi từ DTO sang Entity
         Event event = eventMapper.toEntity(eventDto);
 
-        // Nếu có trường đại học, tìm và gán cho event
-        if (eventDto.getUniversities() != null) {
-            Optional<University> universityOptional = universityRepository.findById(eventDto.getUniversities().getId());
-            if (universityOptional.isPresent()) {
-                event.setUniversity(universityOptional.get());
-            } else {
-                throw new NotFoundException("University not found");
-            }
-        }
+        // Gắn trường đại học vào sự kiện
+        event.setUniversity(university);
 
-        // Lưu event vào cơ sở dữ liệu
-        Event savedEvent = eventRepository.save(event);
+        // Lưu sự kiện vào cơ sở dữ liệu
+        event = eventRepository.save(event);
 
-        // Chuyển lại từ Entity sang DTO và trả về
-        return eventMapper.toDto(savedEvent);
+        communityLeader.setEvent(event);
+
+        // Trả về DTO sau khi lưu
+        return eventMapper.toDto(event);
     }
 
     @Override
@@ -106,9 +134,20 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventDto> getEventByUniversity(String universityName) {
-        // Tìm sự kiện liên quan đến trường đại học
-        List<Event> events = eventRepository.findByUniversity_UniversityName(universityName);
+    public List<EventDto> getEventByUniversity(HttpServletRequest request) {
+        // Lấy token từ cookie
+        String token =  cookieService.getCookie(request, "token");
+        if (token == null) {
+            throw new InvalidCredentialsException("Not Authenticated");
+        }
+        String username = jwtUtils.getUsernameFromToken(token);
+
+        User user = userRepo.findByEmail(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Student student = studentRepo.findByUserId(user.getId());
+
+        List<Event> events = eventRepository.findByUniversity_UniversityName(student.getUniversity().getUniversityName());
 
         // Chuyển đổi từ Entity Event sang DTO EventDto
         return events.stream()
@@ -129,13 +168,23 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<ListStudentAppceptDto> getListStudentAppcept(Long eventId) {
+    public List<ListStudentAppceptDto> getListStudentAppcept(Long eventId,HttpServletRequest request) {
         List<Appcept> appcepts = appceptRepository.findByEventId(eventId);
+        String token =  cookieService.getCookie(request, "token");
+        if (token == null) {
+            throw new InvalidCredentialsException("Not Authenticated");
+        }
+        String username = jwtUtils.getUsernameFromToken(token);
+
+        User user = userRepo.findByEmail(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Student student = studentRepo.findByUserId(user.getId());
+
         return appcepts.stream()
                 .map(appcept -> {
                     ListStudentAppceptDto dto = new ListStudentAppceptDto();
                     // Lấy thông tin sinh viên từ Appcept
-                    Student student = appcept.getStudent();
                     dto.setStudentId(student.getId().toString());
                     dto.setMSSV(student.getMSSV()); // Giả sử bạn có trường fullName trong Student
                     dto.setEventId(eventId.toString());

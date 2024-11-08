@@ -4,6 +4,7 @@ import com.project.RegisterSystem.dto.EventDto;
 import com.project.RegisterSystem.dto.ListStudentAppceptDto;
 import com.project.RegisterSystem.dto.response.ResponseStatusDto;
 import com.project.RegisterSystem.service.Event.EventService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,8 +17,8 @@ import java.util.List;
 public class EventController {
     private final EventService eventService;
     @PostMapping("/create")
-    ResponseEntity<EventDto> createEvent(@RequestBody EventDto eventDto) {
-        return ResponseEntity.ok(eventService.createEvent(eventDto));
+    ResponseEntity<EventDto> createEvent(@RequestBody EventDto eventDto, HttpServletRequest request) {
+        return ResponseEntity.ok(eventService.createEvent(eventDto,request));
     }
     @PutMapping("update/{id}")
     ResponseEntity<EventDto> updateEvent(@PathVariable Long id, @RequestBody EventDto eventDto) {
@@ -35,12 +36,16 @@ public class EventController {
     ResponseEntity<List<EventDto>> getAllEvents() {
         return ResponseEntity.ok(eventService.getAllEvent());
     }
+    @GetMapping("/all-by-university")
+    ResponseEntity<List<EventDto>> getAllUniversityEvents(HttpServletRequest request) {
+        return ResponseEntity.ok(eventService.getEventByUniversity(request));
+    }
     @GetMapping("/accept/{id}")
     ResponseEntity<ResponseStatusDto> acceptEvent(@PathVariable Long id) {
         return ResponseEntity.ok(eventService.acceptEvent(id));
     }
     @GetMapping("/accept-list/{id}")
-    ResponseEntity<List<ListStudentAppceptDto>> acceptEventList(Long eventId) {
-        return ResponseEntity.ok(eventService.getListStudentAppcept(eventId));
+    ResponseEntity<List<ListStudentAppceptDto>> acceptEventList(Long eventId, HttpServletRequest request) {
+        return ResponseEntity.ok(eventService.getListStudentAppcept(eventId,request));
     }
 }

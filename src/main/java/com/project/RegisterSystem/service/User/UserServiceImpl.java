@@ -48,6 +48,18 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         UserDto userDto = new UserDto();
+        userDto.setId(user.getId());
+        if(user.getRole() == UserRole.Student){
+            Student student = studentRepo.findByUserId(user.getId());
+            userDto.setId(student.getId());
+            userDto.setUniversityName(student.getUniversity().getUniversityName());
+        }
+
+        if(user.getRole() == UserRole.UAS){
+            UniversityStaff universityStaff = universityStaffRepo.findByUserId(user.getId());
+            userDto.setId(universityStaff.getId());
+            userDto.setUniversityName(universityStaff.getUniversity().getUniversityName());
+        }
         userDto.setEmail(user.getEmail());
         userDto.setRole(user.getRole());
 
@@ -94,7 +106,7 @@ public class UserServiceImpl implements UserService {
             CommunityLeader leader = new CommunityLeader();
             leader.setUser(user);
             leader.setAddress(registerDto.getAddress());
-            leader.setEvent(eventRepo.findById(registerDto.getEventId()).orElseThrow(() -> new RuntimeException("Event not found")));
+//            leader.setEvent(eventRepo.findById(registerDto.getEventId()).orElseThrow(() -> new RuntimeException("Event not found")));
             ClRepo.save(leader);
         }
 

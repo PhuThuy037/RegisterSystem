@@ -31,6 +31,7 @@ public class JwtUtils {
 
     public String generateToken(UserDto userDto){
         String username = userDto.getEmail();
+
         return generateToken(username);
     }
 
@@ -44,6 +45,9 @@ public class JwtUtils {
     }
 
     public String getUsernameFromToken(String token){
+        return extractClaims(token, Claims::getSubject);
+    }
+    public String getUniversityFromToken(String token){
         return extractClaims(token, Claims::getSubject);
     }
 

@@ -20,7 +20,7 @@ public class EventDto {
     private Status status;
     private String location;
     private int numberOfPeople;
-    private CommunityLeader communityLeader;
+    private CommnityLeaderDto commnityLeaderDto;
     private UniversityDto universities;
 
 
