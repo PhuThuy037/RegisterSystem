@@ -10,6 +10,7 @@ import com.project.RegisterSystem.enums.Status;
 import com.project.RegisterSystem.exception.NotFoundException;
 import com.project.RegisterSystem.repository.CLRepo;
 import com.project.RegisterSystem.repository.EventRepo;
+import com.project.RegisterSystem.repository.UniversityRepo;
 import com.project.RegisterSystem.repository.UserRepo;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,7 @@ public class EventMapper {
 
     private final UserRepo userRepo;
     private final CLRepo clRepo;
-
+    private final UniversityRepo universityRepo;
 
     // Chuyển từ Entity Event sang DTO EventDto
     public EventDto toDto(Event event) {
@@ -34,7 +35,7 @@ public class EventMapper {
         eventDto.setDescription(event.getDescription());
         eventDto.setStartTime(event.getStartTime());
         eventDto.setEndTime(event.getEndTime());
-        eventDto.setStatus(Status.Processing);
+        eventDto.setStatus(event.getStatus());
         eventDto.setLocation(event.getLocation());
         eventDto.setNumberOfPeople(event.getNumberOfPeople());
 
@@ -48,7 +49,7 @@ public class EventMapper {
             UniversityDto universityDto = new UniversityDto();
             universityDto.setId(university.getId());
             universityDto.setUniversityName(university.getUniversityName());
-            eventDto.setUniversities(universityDto);
+            eventDto.setUniversityName(universityDto.getUniversityName());
         }
 
         return eventDto;
@@ -71,10 +72,10 @@ public class EventMapper {
 
 
         // Nếu có UniversityDto, ánh xạ sang trường đại học entity
-        if (eventDto.getUniversities() != null) {
+        if (eventDto.getEventName() != null) {
             University university = new University();
-            university.setId(eventDto.getUniversities().getId());
-            university.setUniversityName(eventDto.getUniversities().getUniversityName());
+            university.setId(eventDto.getId());
+            university.setUniversityName(eventDto.getEventName());
             event.setUniversity(university);
         }
 

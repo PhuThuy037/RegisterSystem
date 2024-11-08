@@ -17,6 +17,7 @@ import com.project.RegisterSystem.service.Cookie.CookieService;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
@@ -42,7 +43,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventDto createEvent(EventDto eventDto, HttpServletRequest request) {
         // Tìm trường đại học dựa trên tên
-        University university = universityRepository.findByUniversityName(eventDto.getUniversities().getUniversityName())
+        University university = universityRepository.findByUniversityName(eventDto.getUniversityName())
                 .orElseThrow(() -> new NotFoundException("University not found"));
 
 
@@ -165,8 +166,9 @@ public class EventServiceImpl implements EventService {
     @Override
     public ResponseStatusDto acceptEvent(Long id) {
        Event event = eventRepository.findById(id).orElseThrow(()-> new NotFoundException("Event not found"));
-
         event.setStatus(Status.Appcept);
+        eventRepository.save(event);
+
         return ResponseStatusDto.builder()
                 .status(200)
                 .message("Event accepted")

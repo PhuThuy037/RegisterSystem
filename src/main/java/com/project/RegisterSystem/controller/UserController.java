@@ -4,12 +4,15 @@ import com.project.RegisterSystem.dto.RegisterDto;
 import com.project.RegisterSystem.dto.UserDto;
 import com.project.RegisterSystem.dto.request.LoginRequest;
 import com.project.RegisterSystem.dto.response.ResponseStatusDto;
+import com.project.RegisterSystem.entity.User;
 import com.project.RegisterSystem.service.User.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/user")
@@ -19,6 +22,7 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<ResponseStatusDto> register(@RequestBody RegisterDto registerDto) {
+        System.out.println(registerDto.getRole());
         return ResponseEntity.ok(userService.register(registerDto));
     }
     @PostMapping("/login")
@@ -28,5 +32,9 @@ public class UserController {
     @GetMapping("/info")
     public ResponseEntity<UserDto> getInfo(HttpServletRequest request) {
         return ResponseEntity.ok(userService.getLoginUser(request));
+    }
+    @GetMapping("/get-all")
+    public ResponseEntity<List<User>> getInfo() {
+        return ResponseEntity.ok(userService.getAllUser());
     }
 }

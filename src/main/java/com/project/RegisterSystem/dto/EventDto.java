@@ -21,7 +21,7 @@ public class EventDto {
     private String location;
     private int numberOfPeople;
     private CommnityLeaderDto commnityLeaderDto;
-    private UniversityDto universities;
+    private String universityName;
 
 
 

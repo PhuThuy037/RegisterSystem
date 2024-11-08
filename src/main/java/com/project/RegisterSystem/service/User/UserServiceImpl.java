@@ -13,9 +13,12 @@ import com.project.RegisterSystem.repository.*;
 import com.project.RegisterSystem.service.Cookie.CookieService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 
 @Service
@@ -68,11 +71,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ResponseStatusDto register(RegisterDto registerDto) {
+        System.out.println(registerDto.getRole());
         User user = new User();
+
         user.setFullName(registerDto.getFullName());
         user.setEmail(registerDto.getEmail());
         user.setPassword(passwordEncoder.encode(registerDto.getPassword()));
-
         user.setPhoneNumber(registerDto.getPhoneNumber());
         user.setRole(registerDto.getRole());
 
@@ -86,9 +90,10 @@ public class UserServiceImpl implements UserService {
                     .orElseThrow(() -> new RuntimeException("University not found"));
             student.setUniversity(university);
             student.setAddress(registerDto.getAddress());
-            studentRepo.save(student);
+
             university.getStudents().add(student);
             universityRepo.save(university);
+            studentRepo.save(student);
         } else if (registerDto.getRole() == UserRole.UAS) {
             UniversityStaff staff = new UniversityStaff();
             staff.setUser(user);
@@ -96,11 +101,13 @@ public class UserServiceImpl implements UserService {
             University university = universityRepo.findByUniversityName(registerDto.getUniversityName())
                     .orElseThrow(() -> new RuntimeException("University not found"));
             staff.setUniversity(university);
-            universityStaffRepo.save(staff);
+
 
             // Nếu cần, thêm staff vào danh sách universityStaff của trường
             university.getUniversityStaff().add(staff);
-            universityRepo.save(university); // Cập nhật lại trường với danh sách nhân viên mới
+            universityRepo.save(university);
+            // Cập nhật lại trường với danh sách nhân viên mới
+            universityStaffRepo.save(staff);
 
         } else if (registerDto.getRole() == UserRole.CL) {
             CommunityLeader leader = new CommunityLeader();
@@ -131,6 +138,19 @@ public class UserServiceImpl implements UserService {
         return ResponseStatusDto.builder()
                 .status(200)
                 .message("User logged in successfully")
+                .build();
+    }
+    @Override
+    public List<User> getAllUser() {
+        return userRepo.findAll();
+    }
+
+    @Override
+    public ResponseStatusDto logout(HttpServletResponse response) {
+        cookieService.deleteCookie(response, "token");
+        return ResponseStatusDto.builder()
+                .status(200)
+                .message("User logged out successfully")
                 .build();
     }
 

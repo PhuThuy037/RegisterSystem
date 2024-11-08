@@ -19,6 +19,7 @@ public class EventController {
     private final EventService eventService;
     @PostMapping("/create")
     ResponseEntity<EventDto> createEvent(@RequestBody EventDto eventDto, HttpServletRequest request) {
+        System.out.println(eventDto);
         return ResponseEntity.ok(eventService.createEvent(eventDto,request));
     }
     @PutMapping("update/{id}")

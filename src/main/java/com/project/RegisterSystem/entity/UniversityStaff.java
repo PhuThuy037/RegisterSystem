@@ -1,5 +1,6 @@
 package com.project.RegisterSystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -13,6 +14,7 @@ public class UniversityStaff {
 
     @ManyToOne
     @JoinColumn(name = "university_id")
+    @JsonIgnore
     private University university;
 
     @OneToOne
